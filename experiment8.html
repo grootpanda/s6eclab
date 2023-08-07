@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Experiment 8</title>
+</head>
+<body>
+  <div class="dark-mode-toggle">
+    <label class="switch">
+      <input type="checkbox" id="darkModeToggle">
+      <span class="slider round"></span>
+    </label>
+    <p>Dark Mode</p>
+  </div>
+  <header>
+    <h1>Experiment 8</h1>
+  </header>
+  <main>
+    <pre><code class="code-block">
+import numpy as np
+import matplotlib.pyplot as plt
+
+N = 10
+Eb = 4
+mess_bits = 2 * np.multiply(np.random.rand(N, 1) > 0.5, 1) - 1  # BPSK message bits
+out_mess = np.sqrt(Eb) * mess_bits
+plt.scatter(out_mess, np.zeros((N, 1)))
+
+# Translation of BPSK
+upsamp = 100
+sigma = 1
+t = np.linspace(0, 1, upsamp)
+mod_sig = np.sin(2 * np.pi * 10 * t)
+# Communicated signal
+com_sig = np.kron(out_mess, mod_sig).reshape(upsamp * N, ) + sigma / 2 * np.random.randn(upsamp * N, )
+plt.plot(com_sig)
+
+# Detection using ML detector (correlation)
+dec = np.zeros((N,))
+for k in np.arange(N):
+    dec[k] = np.sum(com_sig[k * upsamp:(k + 1) * upsamp] * mod_sig) > 0
+print(2 * np.multiply(dec, 1) - 1)
+print(mess_bits)
+
+# Probability of error and SNR
+N = 1000  # No. of message bits
+Pe = np.zeros((10,))
+sigma = 1
+SNR_b = 0.0125 * np.arange(10)
+cnt = 0  # Counter
+for SNR in SNR_b:
+    mess_bits = 2 * np.multiply(np.random.rand(N, 1) > 0.5, 1) - 1
+    out_mess = np.sqrt(SNR) * mess_bits
+    com_sig = np.kron(out_mess, mod_sig).reshape(upsamp * N, ) + sigma / 2 * np.random.randn(upsamp * N)
+    dec = np.zeros((N,))
+    succ = 0
+    # ML detector
+    for k in np.arange(N):
+        dec[k] = 2 * (np.sum(com_sig[k * upsamp:(k + 1) * upsamp] * mod_sig) > 0) - 1
+        if dec[k] == mess_bits[k]:
+            succ += 1
+    Pe[cnt] = 1 - succ / N
+    cnt = cnt + 1
+plt.plot(SNR_b, Pe)
+plt.xlabel("SNR")
+plt.ylabel('Probability of error')
+</code></pre>
+
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

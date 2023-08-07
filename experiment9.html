@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Experiment 9</title>
+</head>
+<body>
+  <div class="dark-mode-toggle">
+    <label class="switch">
+      <input type="checkbox" id="darkModeToggle">
+      <span class="slider round"></span>
+    </label>
+    <p>Dark Mode</p>
+  </div>
+  <header>
+    <h1>Experiment 9</h1>
+  </header>
+  <main>
+    <pre><code class="code-block">
+import numpy as np
+import matplotlib.pyplot as plt
+
+N = 20
+Eb = 4
+mess_bits_I = 2 * np.multiply(np.random.rand(N, 1) > 0.5, 1) - 1  # QPSK Message bits
+out_mess_I = np.sqrt(Eb / 2) * mess_bits_I  # I channel Message bits
+mess_bits_Q = 2 * np.multiply(np.random.rand(N, 1) > 0.5, 1) - 1  # QPSK Message bits
+out_mess_Q = np.sqrt(Eb / 2) * mess_bits_Q  # Q channel Message bits
+plt.scatter(out_mess_I, out_mess_Q)
+plt.title('Constellation of QPSK')
+
+# Transmission of QPSK
+upsamp = 100
+sigma = 1
+t = np.linspace(0, 1, upsamp)
+mod_sig = np.sin(2 * np.pi * 10 * t)
+# Communicated signal
+com_sig_I = np.kron(out_mess_I, mod_sig).reshape(upsamp * N, ) + sigma / 2 * np.random.randn(upsamp * N, )
+com_sig_Q = np.kron(out_mess_Q, mod_sig).reshape(upsamp * N, ) + sigma / 2 * np.random.randn(upsamp * N, )
+plt.subplot(211)
+plt.plot(com_sig_I)
+plt.xlabel('Samples')
+plt.ylabel('Signal in I channel')
+plt.subplot(212)
+plt.plot(com_sig_Q)
+plt.xlabel('Samples')
+plt.ylabel('Signal in Q channel')
+
+# Detection using ML decoder
+dec_I = np.zeros((N,))
+dec_Q = np.zeros((N,))
+for k in np.arange(N):
+    dec_I[k] = np.sum(com_sig_I[k * upsamp:(k + 1) * upsamp] * mod_sig) > 0
+    dec_Q[k] = np.sum(com_sig_Q[k * upsamp:(k + 1) * upsamp] * mod_sig) > 0
+print(2 * np.multiply(dec_I, 1) - 1)
+print(mess_bits_I.T)
+print(2 * np.multiply(dec_Q, 1) - 1)
+print(mess_bits_Q.T)
+[ 1. -1. -1. -1. -1. -1. -1. -1. 1. -1. -1. 1. 1. 1. -1. -1. -1. 1. 1. 1.]
+[[ 1 -1 -1 -1 -1 -1 -1 -1 1 -1 -1 1 1 1 -1 -1 -1 1 1 1]]
+
+[-1. 1. 1. -1. 1. -1. -1. -1. -1. 1. -1. 1. 1. -1. -1. -1. 1. -1. -1. 1.]
+[[-1 1 1 -1 1 -1 -1 -1 -1 1 -1 1 1 -1 -1 -1 1 -1 -1 1]]
+
+# Probability of error and SNR
+N = 1000  # No. of message bits
+Pe = np.zeros((10,))
+SNR_b = 0.0125 * np.arange(10)
+cnt = 0  # Counter
+for SNR in SNR_b:
+    mess_bits_I = 2 * np.multiply(np.random.rand(N, 1) > 0.5, 1) - 1
+    out_mess_I = np.sqrt(SNR) * mess_bits_I
+    com_sig_I = np.kron(out_mess_I, mod_sig).reshape(upsamp * N, ) + sigma / 2 * np.random.randn(upsamp * N)
+    mess_bits_Q = 2 * np.multiply(np.random.rand(N, 1) > 0.5, 1) - 1
+    out_mess_Q = np.sqrt(SNR) * mess_bits_Q
+    com_sig_Q = np.kron(out_mess_Q, mod_sig).reshape(upsamp * N, ) + sigma / 2 * np.random.randn(upsamp * N)
+    dec_I = np.zeros((N,))
+    dec_Q = np.zeros((N,))
+    succ = 0
+    # ML detector
+    for k in np.arange(N):
+        dec_I[k] = 2 * (np.sum(com_sig_I[k * upsamp:(k + 1) * upsamp] * mod_sig) > 0) - 1
+        dec_Q[k] = 2 * (np.sum(com_sig_Q[k * upsamp:(k + 1) * upsamp] * mod_sig) > 0) - 1
+        if (dec_I[k] == mess_bits_I[k]) & (mess_bits_Q[k]):
+            succ += 1
+    Pe[cnt] = 1 - succ / N
+    cnt = cnt + 1
+plt.plot(SNR_b, Pe)
+plt.xlabel("SNR")
+plt.ylabel('Probability of error')
+</code></pre>
+
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

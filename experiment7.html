@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Experiment 4</title>
+</head>
+<body>
+  <div class="dark-mode-toggle">
+    <label class="switch">
+      <input type="checkbox" id="darkModeToggle">
+      <span class="slider round"></span>
+    </label>
+    <p>Dark Mode</p>
+  </div>
+  <header>
+    <h1>Experiment 4</h1>
+  </header>
+  <main>
+   <pre><code class="code-block">
+import numpy as np<br>
+import matplotlib.pyplot as plt<br>
+N = 10<br>
+upsamp = 4<br>
+mess_bits = 2*np.multiply(np.random.rand(N,1) > 0.5, 1)-1<br>
+out_mess = np.kron(mess_bits, [1,0,0,0]).reshape(upsamp*N,)  # <br>
+print(out_mess)<br>
+
+<br>
+N = 10<br>
+upsamp = 4<br>
+mess_bits = 2*np.multiply(np.random.rand(N,1) > 0.5, 1)-1<br>
+out_mess = np.kron(mess_bits, [1,0,0,0]).reshape(upsamp*N,)  # <br>
+print(out_mess)<br>
+
+def raised_root_cosine(upsample, num_positive_lobes, alpha):<br>
+    """<br>
+    Root raised cosine (RRC) filter (FIR) impulse response.<br>
+    upsample: number of samples per symbol<br>
+    num_positive_lobes: number of positive overlaping symbols<br>
+    length of filter is 2 * num_positive_lobes + 1 samples<br>
+    alpha: roll-off factor<br>
+    """<br>
+    N = upsample * (num_positive_lobes * 2 + 1)<br>
+    t = (np.arange(N) - N / 2) / upsample<br>
+    # result vector<br>
+    h_rrc = np.zeros(t.size, dtype=np.float)<br>
+    # index for special cases<br>
+    sample_i = np.zeros(t.size, dtype=np.bool)<br>
+    # deal with special cases<br>
+    subi = t == 0<br>
+    sample_i = np.bitwise_or(sample_i, subi)<br>
+    h_rrc[subi] = 1.0 - alpha + (4 * alpha / np.pi)<br>
+    subi = np.abs(t) == 1 / (4 * alpha)<br>
+    sample_i = np.bitwise_or(sample_i, subi)<br>
+    h_rrc[subi] = (alpha / np.sqrt(2)) \<br>
+    * (((1 + 2 / np.pi) * (np.sin(np.pi / (4 * alpha))))<br>
+    + ((1 - 2 / np.pi) * (np.cos(np.pi / (4 * alpha)))))<br>
+    # base case<br>
+    sample_i = np.bitwise_not(sample_i)<br>
+    ti = t[sample_i]<br>
+    h_rrc[sample_i] = np.sin(np.pi * ti * (1 - alpha)) \<br>
+    + 4 * alpha * ti * np.cos(np.pi * ti * (1 + alpha))<br>
+    h_rrc[sample_i] /= (np.pi * ti * (1 - (4 * alpha * ti) ** 2))<br>
+    return h_rrc<br>
+
+p = raised_root_cosine(5,3,0.4)<br>
+plt.stem(p)<br>
+print(np.size(p))<br>
+
+# Generation of eye diagram<br>
+ys = []<br>
+for k in range(N):<br>
+    out = np.kron(mess_bits[k], [1,0,0,0]).reshape(upsamp,)  # <br>
+    cc = np.convolve(out,p)<br>
+    cc_AWGN = cc + 0.15*np.random.randn(np.size(cc))<br>
+    ys.append(cc_AWGN)<br>
+    # cc_AWGN = cc + 0.5*np.random.randn(np.size(cc))<br>
+fig, axs = plt.subplots(nrows=1, sharex=True)<br>
+axs.plot(np.array(ys).T, color='crimson', alpha=1, lw=.3)<br>
+</code></pre>
+
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

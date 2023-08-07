@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Experiment 4</title>
+</head>
+<body>
+  <div class="dark-mode-toggle">
+    <label class="switch">
+      <input type="checkbox" id="darkModeToggle">
+      <span class="slider round"></span>
+    </label>
+    <p>Dark Mode</p>
+  </div>
+  <header>
+    <h1>Experiment 4</h1>
+  </header>
+  <main>
+<pre><code class="code-block">
+1. UNIT PULSE
+
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+n = np.arange(-5, 6)
+x = np.zeros_like(n)
+x[n == 0] = 1  # position 1 at the center
+plt.stem(n, x)  # stem plot of signal x
+plt.xticks(n);
+
+
+2. DISCRETE PULSE
+
+n = np.arange(-5, 6)
+x = np.zeros_like(n)
+x[(n >= 0) & (n <= 4)] = 1  # position the tp from 0 to 4
+x[(n >= -4) & (n <= -1)] = -1  # position the time pulse from -4 to -1
+plt.stem(n, x)
+plt.xticks(n);
+
+
+3. DISCRETE PULSE
+
+n = np.arange(0, 6)
+x = np.zeros_like(n)
+x[n] = n
+plt.stem(n, x)
+plt.xticks(n);
+</code></pre>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

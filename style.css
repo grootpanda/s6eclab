@@ -1,0 +1,107 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f4f4f4;
+  color: #333;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark-mode {
+  background-color: #333;
+  color: white;
+}
+
+.dark-mode-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 15px;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  background-color: #ccc;
+  border-radius: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 21px;
+  width: 21px;
+  left: -3px;
+  bottom: -3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+input[type="checkbox"] {
+  display: none;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+  box-shadow: none;
+}
+
+input:checked + .slider:before {
+  transform: translateX(15px);
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+main {
+  width: 80%;
+  max-width: 800px;
+  text-align: left;
+}
+
+#textContainer {
+  padding: 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark-mode #textContainer {
+  background-color: #333;
+  color: white;
+}
+
+/* Add this CSS to your style.css file */
+.experiment-links {
+  text-align: center;
+  margin-top: 20px; /* Add some top margin for spacing */
+}
+
+.experiment-links a {
+  display: block;
+  margin-bottom: 10px; /* Add some bottom margin for spacing between links */
+}
+

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Experiment 6</title>
+</head>
+<body>
+  <div class="dark-mode-toggle">
+    <label class="switch">
+      <input type="checkbox" id="darkModeToggle">
+      <span class="slider round"></span>
+    </label>
+    <p>Dark Mode</p>
+  </div>
+  <header>
+    <h1>Experiment 6</h1>
+  </header>
+  <main>
+ 
+#Generation of random numbers as message bits<br>
+import numpy as np<br>
+import matplotlib.pyplot as plt<br>
+N=100 #number of message bits<br>
+
+Z=np.random.rand(N,1)>0.5 #uniform random variable<br>
+
+Y= np.multiply(np.random.rand(N,1)>0.5,1)<br>
+
+X=2*Y-1 #uniform random variable in range [0,1]<br>
+
+plt.plot(X)<br>
+<br>
+
+
+#Pulse shaping and matched filtering<br>
+
+N=10<br>
+
+upsamp=4<br>
+
+mess_bits=2*np.multiply(np.random.rand(N,1)>0.5,1)-1<br>
+
+out_mess=np.kron(mess_bits, [1,0,0,0]).reshape(upsamp*N,)<br>
+
+print(out_mess)<br>
+
+<br>
+
+#Pulse shaping and matched filtering<br>
+
+N=10<br>
+
+upsamp=4<br>
+
+mess_bits=2*np.multiply(np.random.rand(N,1)>0.5,1)-1<br>
+
+out_mess=np.kron(mess_bits, [1,0,0,0]).reshape(upsamp*N,)<br>
+
+print(out_mess)<br>
+
+def raised_root_cosine(upsample, num_positive_lobes, alpha):<br>
+
+"""<br>
+
+Root raised cosine (RRC) filter (FIR) impulse response.<br>
+
+upsample: number of samples per symbol<br>
+
+num_positive_lobes: number of positive overlaping symbols<br>
+
+length of filter is 2 * num_positive_lobes + 1 samples<br>
+
+alpha: roll-off factor<br>
+
+"""
+N = upsample * (num_positive_lobes * 2 + 1)<br>
+
+t = (np.arange(N) - N / 2) / upsample<br>
+<br>
+
+# result vector<br>
+
+h_rrc = np.zeros(t.size, dtype=np.float)<br>
+
+# index for special cases<br>
+
+sample_i = np.zeros(t.size, dtype=np.bool)<br>
+
+# deal with special cases<br>
+
+subi = t == 0<br>
+
+sample_i = np.bitwise_or(sample_i, subi)<br>
+
+h_rrc[subi] = 1.0 - alpha + (4 * alpha / np.pi)<br>
+
+subi = np.abs(t) == 1 / (4 * alpha)<br>
+
+sample_i = np.bitwise_or(sample_i, subi)<br>
+
+h_rrc[subi] = (alpha / np.sqrt(2)) \<br>
+
+* (((1 + 2 / np.pi) * (np.sin(np.pi / (4 * alpha))))<br>
+
++ ((1 - 2 / np.pi) * (np.cos(np.pi / (4 * alpha)))))<br>
+<br>
+
+# base case<br>
+
+sample_i = np.bitwise_not(sample_i)<br>
+
+ti = t[sample_i]<br>
+
+h_rrc[sample_i] = np.sin(np.pi * ti * (1 - alpha)) \<br>
+
++ 4 * alpha * ti * np.cos(np.pi * ti * (1 + alpha))<br>
+
+h_rrc[sample_i] /= (np.pi * ti * (1 - (4 * alpha * ti) ** 2))<br>
+
+return h_rrc<br>
+
+p = raised_root_cosine(4,3,0.4)<br>
+
+plt.plot(p)<br>
+
+print(np.shape(p))<br>
+<br>
+
+
+
+#plot of the resultant signal<br>
+
+cc = np.convolve(out_mess,p)<br>
+
+#convolve message bits with the pulse shape<br>
+
+cc_AWGN = cc + 0.5*np.random.randn(np.size(cc))<br>
+
+#additive white guassian noise<br>
+
+plt.plot(cc_AWGN)<br>
+
+
+
+#Matched filtering<br>
+
+cc_MF = np.convolve(cc_AWGN,p)<br>
+
+plt.plot(cc_MF)<br>
+
+<br>
+
+#sample the signal and compare against message sequence<br>
+
+m=0<br>
+
+db= []<br>
+
+for b in mess_bits:<br>
+
+start = (m+7)*upsamp<br>
+
+m = m+1<br>
+
+if cc_MF[start] > 0:<br>
+
+db.append(1)<br>
+
+else:<br>
+
+db.append(-1)<br>
+
+print(db)<br>
+
+print(mess_bits.reshape(10,))<br>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
